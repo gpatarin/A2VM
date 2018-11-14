@@ -2,6 +2,10 @@
 N_SITES=0
 SITES_AVAILABLE=$(ls /etc/apache2/sites-available/ | grep ^000 | grep -v \\.save$ | sed -e 's/000-\(.*\)\.conf/\1/')
 
+for i in ${SITES_AVAILABLE}; do
+    LIST_OF_SITES=("${LIST_OF_SITES[@]}" i)
+done
+
 function newVhost(){
     echo "$1"
 }
@@ -13,9 +17,12 @@ function deleteVhost(){
     do
         read -p "Select the site you want to delete (type exit if you want to go back): " selection
         if [[ selection -eq "exit" ]];then
+            echo "exited"
             break
         fi
     done
+
+    echo "Selected $selection"
 
 }
 
