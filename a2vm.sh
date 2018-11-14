@@ -13,16 +13,23 @@ function newVhost(){
 function deleteVhost(){
     listVhost
     selection=-1
-    while [[ selection -lt 0 ]] || [[ selection -gt N_SITES ]] || [[ selection -eq 0 ]]
+    while [[ selection -lt 0 ]] || [[ selection -gt N_SITES ]] || [[ selection -eq 0 ]];
     do
         read -p "Select the site you want to delete (type exit if you want to go back): " selection
+
+        if [[ selection -eq 0 ]]; then
+            selection = -1
+        fi
+
+
         if [[ selection -eq "exit" ]];then
             echo "exited"
             break
         fi
     done
 
-    echo "Selected $selection"
+
+    echo "Selected $LIST_OF_SITES[$selection]"
 
 }
 
