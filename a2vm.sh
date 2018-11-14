@@ -1,4 +1,5 @@
 #!/bin/bash
+N_SITES=0
 
 function newVhost(){
     echo "$1"
@@ -6,8 +7,16 @@ function newVhost(){
 
 function deleteVhost(){
     listVhost
-    read -ep "Select the site you want to delete: " -i Default answer ANSWER
-    echo "$ANSWER"
+    selection=-1
+    while ((selection<0 || selection>N_SITES || selection==0))
+    do
+        read -p "Select the site you want to delete (type exit if you want to go back): " selection
+        if ((selection=="exit"))
+        then 
+            break
+        fi
+    done
+
 }
 
 function listVhost(){
@@ -20,6 +29,7 @@ function listVhost(){
         count=$((count+1))
         echo "$count:$i"
     done
+    N_SITES=$count
     echo "======================="
 }
 
