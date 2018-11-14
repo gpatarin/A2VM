@@ -1,11 +1,11 @@
 #!/bin/bash
 
 function newVhost(){
-
+    echo "$1"
 }
 
 function deleteVhost(){
-    
+    echo "$1"
 }
 
 function listVhost(){
