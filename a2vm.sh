@@ -43,6 +43,14 @@ function newVhost(){
         CustomLog \${APACHE_LOG_DIR}/access.log combined
     </VirtualHost>" > /etc/apache2/sites-available/${servername}.conf
 
+    read -p "Do you want to enable the VirtualHost ? (Y/N)" -n 1 -r
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        a2ensite ${servername}
+        apache2ctl restart
+    else
+        echo "Don't worry you can do this later via the menu of the script"
+    fi
 }
 
 newVhost
