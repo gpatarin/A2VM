@@ -1,4 +1,6 @@
 #!/bin/bash
+apache2_sites_enabled='/etc/apache2/sites-enabled'
+apache2_sites_available='/etc/apache2/sites-available'
 documentroot_default='/var/www'
 default_reply_yes='Y'
 default_reply_no='N'
@@ -14,13 +16,13 @@ function newVhost(){
     if [[ ! -z $tempcheck ]]
     then
         echo "---------------------------------------------------------------------"
-        echo "Warning : $servername.conf existing in /etc/apache2/sites-available/"
+        echo "Warning : $servername.conf existing in ${apache2_sites_available}"
         echo "If you continue you will erase it"
         echo "---------------------------------------------------------------------"
     fi
     read -p "Where are the website files ? (Default will be : $documentroot_default/$servername) : " documentroot
     documentroot=${documentroot:-$documentroot_default/$servername}
-    read -p "Do you want to specify a log folder ? (Y/N) : " -n 1 -r
+    read -p "Do you want to specify a log folder ? (Y/N) (default: N) : " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
@@ -35,17 +37,17 @@ function newVhost(){
         echo "Setting custom log to : $customlog"
     fi
 
-    echo "Writing to /etc/apache2/sites-available/${servername}.conf"
+    echo "Writing to ${apache2_sites_available}/${servername}.conf"
 
     echo "#Generated using A2VM - http://github.com/gpatarin/A2VM
     <VirtualHost *:80>
         ServerName ${servername}
         DocumentRoot ${documentroot}
         ErrorLog  ${errorlog}
-        CustomLog ${customlog}
-    </VirtualHost>" > /etc/apache2/sites-available/${servername}.conf
+        CustomLog ${customlog} combined
+    </VirtualHost>" > ${apache2_sites_available}/${servername}.conf
 
-    read -p "Do you want to enable the VirtualHost ? (Y/N)" -n 1 -r
+    read -p "Do you want to enable the VirtualHost ? (Y/N) (default: Y)" -n 1 -r
     REPLY=${REPLY:-$default_reply_yes}
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
@@ -54,6 +56,25 @@ function newVhost(){
     else
         read -p "Don't worry you can do this later via the menu of the script!"
     fi
+
+    # TODO : ADD HOSTS FILE SUPPORT --> cat /etc/hosts | GREP ${servername}
+    echo "----------------------------------------------------------------------------------"
+    echo "REMEMBER TO ADD A LINE IN YOUR /etc/hosts FILE IF ITS NOT ALREADY DONE"
+    echo "IF YOU DONT KNOW WHAT IS THE /etc/hosts FILE IS, LOOK HERE : https://goo.gl/8j17rt"
+    echo "----------------------------------------------------------------------------------"
+    read -p "Everything should be ok now ! You can go to http://${servername} (Press ENTER to go to the main menu)"
 }
 
-newVhost
+function listavailableVhosts(){
+    clear
+    echo "Listing sites-available"
+    availablevhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$" | grep -v ssl)
+    count=0
+    for i in ${availablevhosts}; do
+     echo "${count}. ${i}"
+     ((count=count+1))
+    done
+}
+
+listavailableVhosts
+
