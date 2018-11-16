@@ -1,4 +1,5 @@
 #!/bin/bash
+
 apache2_sites_enabled='/etc/apache2/sites-enabled'
 apache2_sites_available='/etc/apache2/sites-available'
 documentroot_default='/var/www'
@@ -76,5 +77,32 @@ function listavailableVhosts(){
     done
 }
 
-listavailableVhosts
+function listenabledVhosts(){
+    clear
+    echo "Listing sites-enabled"
+    enabledvhosts=$(ls ${apache2_sites_enabled} | grep ".*\.conf$")
+    count=0
+    for i in ${enabledvhosts}; do
+     echo "${count}. ${i}"
+     ((count=count+1))
+    done
+}
+
+function deleteVhost(){
+    clear
+    echo "Here is the list of sites of the sites you can delete :"
+    enabledvhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$")
+    count=0
+    for i in ${enabledvhosts}; do
+     echo "${count}. ${i}"
+     ((count=count+1))
+    done
+
+}
+
+
+
+
+
+
 
