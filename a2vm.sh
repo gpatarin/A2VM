@@ -1,8 +1,10 @@
 #!/bin/bash
 documentroot_default='/var/www'
+default_reply_yes='Y'
+default_reply_no='N'
 hostname=$(hostname)
-default_errorlog_folder='\${APACHE_LOG_DIR}/error.log'
-default_customlog_folder='\${APACHE_LOG_DIR}/access.log'
+default_errorlog_folder='${APACHE_LOG_DIR}/error.log'
+default_customlog_folder='${APACHE_LOG_DIR}/access.log'
 
 function newVhost(){
     clear
@@ -39,17 +41,18 @@ function newVhost(){
     <VirtualHost *:80>
         ServerName ${servername}
         DocumentRoot ${documentroot}
-        ErrorLog  \${APACHE_LOG_DIR}/error.log
-        CustomLog \${APACHE_LOG_DIR}/access.log combined
+        ErrorLog  ${errorlog}
+        CustomLog ${customlog}
     </VirtualHost>" > /etc/apache2/sites-available/${servername}.conf
 
     read -p "Do you want to enable the VirtualHost ? (Y/N)" -n 1 -r
+    REPLY=${REPLY:-$default_reply_yes}
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
         a2ensite ${servername}
         apache2ctl restart
     else
-        echo "Don't worry you can do this later via the menu of the script"
+        read -p "Don't worry you can do this later via the menu of the script!"
     fi
 }
 
