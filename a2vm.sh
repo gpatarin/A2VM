@@ -14,7 +14,7 @@ function newVhost(){
     read -p "Enter the server name (Example: domain.com or subdomain.domain.com | Default: $hostname) : " servername
     servername=${servername:-$hostname}
     tempcheck=$(ls /etc/apache2/sites-available | grep -w "^${servername}.conf")
-    if [[ ! -z $tempcheck ]]
+    if [[ ! -z ${tempcheck} ]]
     then
         echo "---------------------------------------------------------------------"
         echo "Warning : $servername.conf existing in ${apache2_sites_available}"
@@ -70,10 +70,10 @@ function listavailableVhosts(){
     clear
     echo "Listing sites-available"
     availablevhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$" | grep -v ssl)
-    count=0
-    for i in ${availablevhosts}; do
-     echo "${count}. ${i}"
-     ((count=count+1))
+    PS3=""
+    select userinput in ${availablevhosts};
+    do
+        break
     done
 }
 
@@ -81,25 +81,46 @@ function listenabledVhosts(){
     clear
     echo "Listing sites-enabled"
     enabledvhosts=$(ls ${apache2_sites_enabled} | grep ".*\.conf$")
-    count=0
-    for i in ${enabledvhosts}; do
-     echo "${count}. ${i}"
-     ((count=count+1))
+    PS3=""
+    select userinput in ${enabledvhosts};
+    do
+        break
     done
 }
 
 function deleteVhost(){
     clear
-    echo "Here is the list of sites of the sites you can delete :"
-    enabledvhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$")
-    count=0
-    for i in ${enabledvhosts}; do
-     echo "${count}. ${i}"
-     ((count=count+1))
+    hostname=""
+    confirmation=''
+    echo "Here is the list of sites of the sites you can delete"
+    availablevhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$" | grep -v ssl)
+    PS3="Pick a site: "
+    select userinput in ${availablevhosts};
+    do
+        # read -p "Do you want to enable the VirtualHost ? (Y/N) (default: Y)" -n 1 confirmation
+        # confirmation=${confirmation:-$default_reply_no}
+
+        if [[ ! -z ${userinput} ]]
+        then
+            read -p "Are you sure that you want to delete $userinput ? (Y/N) (default: N)" -n 1 confirmation
+            echo
+            confirmation=${confirmation:-$default_reply_no}
+            if [[ ${confirmation} =~ ^[Yy]$ ]]
+            then
+                hostname=${userinput}
+                break
+            fi
+        fi
     done
 
+    a2dissite ${hostname}
+    apache2ctl restart
+    rm ${apache2_sites_available}/${hostname}
+    echo "Successfully removed $hostname"
 }
 
+
+deleteVhost
 
 
 
