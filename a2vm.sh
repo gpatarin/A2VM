@@ -35,7 +35,8 @@ function newVhost(){
 
     echo "Writing to /etc/apache2/sites-available/${servername}.conf"
 
-    "<VirtualHost *:80>
+    echo "#Generated using A2VM - http://github.com/gpatarin/A2VM
+    <VirtualHost *:80>
         ServerName ${servername}
         DocumentRoot ${documentroot}
         ErrorLog  \${APACHE_LOG_DIR}/error.log
