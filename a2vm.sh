@@ -5,14 +5,13 @@ apache2_sites_available='/etc/apache2/sites-available'
 documentroot_default='/var/www'
 default_reply_yes='Y'
 default_reply_no='N'
-hostname=$(hostname)
 default_errorlog_folder='${APACHE_LOG_DIR}/error.log'
 default_customlog_folder='${APACHE_LOG_DIR}/access.log'
 
 function newVhost(){
     clear
-    read -p "Enter the server name (Example: domain.com or subdomain.domain.com | Default: $hostname) : " servername
-    servername=${servername:-$hostname}
+    read -p "Enter the server name (Example: domain.com or subdomain.domain.com | Default: $HOSTNAME) : " servername
+    servername=${servername:-$HOSTNAME}
     tempcheck=$(ls /etc/apache2/sites-available | grep -w "^${servername}.conf")
     if [[ ! -z ${tempcheck} ]]
     then
@@ -25,6 +24,8 @@ function newVhost(){
     documentroot=${documentroot:-$documentroot_default/$servername}
     read -p "Do you want to specify a log folder ? (Y/N) (default: N) : " -n 1 -r
     echo
+    errorlog=${default_errorlog_folder}
+    customlog=${default_customlog_folder}
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
         read -p "Enter the error log location ? (Default : $default_errorlog_folder) : " errorlog
@@ -32,8 +33,6 @@ function newVhost(){
         read -p "Enter the custom log location ? (Default : $default_customlog_folder) : " customlog
         customlog=${customlog:-$default_customlog_folder}
     else
-        errorlog=${default_errorlog_folder}
-        customlog=${default_customlog_folder}
         echo "Setting error log to : $errorlog"
         echo "Setting custom log to : $customlog"
     fi
@@ -90,16 +89,13 @@ function listenabledVhosts(){
 
 function deleteVhost(){
     clear
-    hostname=""
+    servername=""
     confirmation=''
     echo "Here is the list of sites of the sites you can delete"
     availablevhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$" | grep -v ssl)
     PS3="Pick a site: "
     select userinput in ${availablevhosts};
     do
-        # read -p "Do you want to enable the VirtualHost ? (Y/N) (default: Y)" -n 1 confirmation
-        # confirmation=${confirmation:-$default_reply_no}
-
         if [[ ! -z ${userinput} ]]
         then
             read -p "Are you sure that you want to delete $userinput ? (Y/N) (default: N)" -n 1 confirmation
@@ -107,22 +103,45 @@ function deleteVhost(){
             confirmation=${confirmation:-$default_reply_no}
             if [[ ${confirmation} =~ ^[Yy]$ ]]
             then
-                hostname=${userinput}
+                servername=${userinput}
                 break
             fi
         fi
     done
 
-    a2dissite ${hostname}
+    a2dissite ${servername}
     apache2ctl restart
-    rm ${apache2_sites_available}/${hostname}
-    echo "Successfully removed $hostname"
+    rm ${apache2_sites_available}/${servername}
+    echo "Successfully removed $servername"
 }
 
+function enableVhost(){
+    availablevhosts=$(ls ${apache2_sites_available} | grep ".*\.conf$" | grep -v ssl)
+    enabledvhosts=$(ls ${apache2_sites_enabled} | grep ".*\.conf$")
+    vhosttoenable=${availablevhosts//$enabledvhosts}
+    select userinput in ${vhosttoenable};
+    do
+        if [[ ! -z ${userinput} ]]
+        then
+            a2ensite ${userinput}
+            echo "Enabled site : ${userinput}"
+            break
+        fi
+    done
+}
 
-deleteVhost
-
-
+function disableVhost(){
+    enabledvhosts=$(ls ${apache2_sites_enabled} | grep ".*\.conf$")
+    select userinput in ${enabledvhosts};
+    do
+        if [[ ! -z ${userinput} ]]
+        then
+            a2dissite ${userinput}
+            echo "Disabled site : ${userinput}"
+            break
+        fi
+    done
+}
 
 
 
