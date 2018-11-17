@@ -1,3 +1,9 @@
+: '
+A2VM Apache2 VirtualHosts Manager Bash script
+created by gpatarin in 2018
+
+Version 1.0
+'
 #!/bin/bash
 
 apache2_sites_enabled='/etc/apache2/sites-enabled'
@@ -63,6 +69,7 @@ function newVhost(){
     echo "IF YOU DONT KNOW WHAT IS THE /etc/hosts FILE IS, LOOK HERE : https://goo.gl/8j17rt"
     echo "----------------------------------------------------------------------------------"
     read -p "Everything should be ok now ! You can go to http://${servername} (Press ENTER to go to the main menu)"
+    main
 }
 
 function listavailableVhosts(){
@@ -74,6 +81,7 @@ function listavailableVhosts(){
     do
         break
     done
+    main
 }
 
 function listenabledVhosts(){
@@ -85,6 +93,7 @@ function listenabledVhosts(){
     do
         break
     done
+    main
 }
 
 function deleteVhost(){
@@ -113,6 +122,7 @@ function deleteVhost(){
     apache2ctl restart
     rm ${apache2_sites_available}/${servername}
     echo "Successfully removed $servername"
+    main
 }
 
 function enableVhost(){
@@ -128,6 +138,7 @@ function enableVhost(){
             break
         fi
     done
+    main
 }
 
 function disableVhost(){
@@ -141,8 +152,47 @@ function disableVhost(){
             break
         fi
     done
+    main
 }
 
+function main() {
+    clear
+    echo "-----------------------------------------------------"
+    echo "|       A2VM - APACHE2 VIRTUALHOST MANAGER          |"
+    echo "| Simple bash script for managing virtualhosts of   |"
+    echo "| apache2 server.                                   |"
+    echo "|                                                   |"
+    echo "|         http://github.com/gpatarin/A2VM           |"
+    echo "|                                                   |"
+    echo "| Author: gpatarin                             2018 |"
+    echo "-----------------------------------------------------"
+    echo
+    PS3="What do you want to do ? : "
+    select item in "Add a new VirtualHost/Website" "Delete a VirtualHost/Website" "Enable a VirtualHost/Website" "Disable a VirtualHost/Website" "List available VirtualHosts/Websites" "List enabled VirtualHosts/Websites"
+    do
+        case $REPLY in
+                1)
+                    newVhost
+                    ;;
+                2)
+                    deleteVhost
+                    ;;
 
+                3)
+                    enableVhost
+                    ;;
+                4)
+                    disableVhost
+                    ;;
+                5)
+                    listavailableVhosts
+                    ;;
+                6)
+                    listenabledVhosts
+                    ;;
+        esac
 
+    done
+}
 
+main
